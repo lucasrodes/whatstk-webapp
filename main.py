@@ -37,11 +37,14 @@ ENCODING_DEFAULT = "utf-8"
 st.title('WhatsApp chart parser')
 
 
+# Info block
+# st.markdown("### Upload your WhatsApp chat file")
+
 # Upload file box
 uploaded_file = st.file_uploader(
-    label="Upload a file",
+    label="Upload your WhatsApp chat file ([learn more](https://whatstk.readthedocs.io/en/stable/source/getting_started/export_chat.html)).",
     type="txt",
-    label_visibility="collapsed",
+    # label_visibility="collapsed",
 )
 
 # Define temporary file (chat will be stored here temporarily)
