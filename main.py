@@ -34,7 +34,7 @@ with st.sidebar:
 ENCODING_DEFAULT = "utf-8"
 
 # APP title
-st.title('WhatsApp chart parser')
+st.title('WhatsApp chat parser')
 
 
 # Info block
