@@ -107,6 +107,7 @@ if uploaded_file is not None:
             "please provide a sample of your chat (feel free to replace the actual messages with dummy text)."
         )
     else:
+        if 
         # Remove system messages
         sys_msgs = [
             # r"Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
@@ -114,11 +115,16 @@ if uploaded_file is not None:
             r".?Group creator created this group",
             r".?You were added",
         ]
-        username_system = []
         for sys_msg in sys_msgs:
             mask = df['message'].str.fullmatch(sys_msg)
-            username_system += list(df.loc[mask, "username"])
-        df = df[~df["username"].isin(set(username_system))]
+            df = df[~mask]
+        if df["username"].nunique() > 2:
+            # Get username of the system
+            username_system = []
+            for sys_msg in sys_msgs:
+                mask = df['message'].str.fullmatch(sys_msg)
+                username_system += list(df.loc[mask, "username"])
+            df = df[~df["username"].isin(set(username_system))]
         # Download option
         csv = df.to_csv().encode(ENCODING_DEFAULT)
         st.download_button(
