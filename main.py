@@ -107,7 +107,6 @@ if uploaded_file is not None:
             "please provide a sample of your chat (feel free to replace the actual messages with dummy text)."
         )
     else:
-        if 
         # Remove system messages
         sys_msgs = [
             # r"Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
@@ -118,6 +117,7 @@ if uploaded_file is not None:
         for sys_msg in sys_msgs:
             mask = df['message'].str.fullmatch(sys_msg)
             df = df[~mask]
+
         if df["username"].nunique() > 2:
             # Get username of the system
             username_system = []
