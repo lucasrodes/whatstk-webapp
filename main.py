@@ -15,7 +15,7 @@ from whatstk import FigureBuilder
 # Page settings
 st.set_page_config(
     page_title="WhatsApp chat parser",
-    page_icon=None,
+    page_icon="favicon.png",
     layout="centered",
     initial_sidebar_state="collapsed",
     menu_items=None
