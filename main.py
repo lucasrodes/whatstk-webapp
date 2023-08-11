@@ -7,6 +7,11 @@ from pathlib import Path
 import streamlit as st
 import tempfile
 from whatstk import df_from_txt_whatsapp
+import zipfile
+import os
+from whatstk import WhatsAppChat, FigureBuilder
+from whatstk.graph import plot
+from whatstk.data import whatsapp_urls
 
 
 # Page settings
@@ -43,7 +48,7 @@ st.title('WhatsApp chart parser')
 # Upload file box
 uploaded_file = st.file_uploader(
     label="Upload your WhatsApp chat file ([learn more](https://whatstk.readthedocs.io/en/stable/source/getting_started/export_chat.html)).",
-    type="txt",
+    type=["txt", "zip"],
     # label_visibility="collapsed",
 )
 
@@ -57,11 +62,26 @@ if uploaded_file is not None:
 
     # Load file as dataframe
     try:
-        df = df_from_txt_whatsapp(
-            output_temporary_file.name,
-            hformat=hformat,
-            encoding=encoding,
-        )
+        if uploaded_file.name.endswith(".zip"):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Uncompress the file
+                with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+
+                files = os.listdir(temp_dir)
+                assert len(files) == 1, "Unexpected number of files in the compressed file! Only one is expected (the chat txt file)"
+                # Read
+                df = df_from_txt_whatsapp(
+                    temp_dir / Path(files[0]),
+                    hformat=hformat,
+                    encoding=encoding,
+                )
+        else:
+            df = df_from_txt_whatsapp(
+                output_temporary_file.name,
+                hformat=hformat,
+                encoding=encoding,
+            )
     except RuntimeError:
         st.error(
             "The chat could not be parsed automatically! You can try to set custom `hformat` "
@@ -70,6 +90,18 @@ if uploaded_file is not None:
             "please provide a sample of your chat (feel free to replace the actual messages with dummy text)."
         )
     else:
+        # Remove system messages
+        sys_msgs = [
+            # r"Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
+            r".?Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
+            r".?Group creator created this group",
+            r".?You were added",
+        ]
+        username_system = []
+        for sys_msg in sys_msgs:
+            mask = df['message'].str.fullmatch(sys_msg)
+            username_system += list(df.loc[mask, "username"])
+        df = df[~df["username"].isin(set(username_system))]
         # Download option
         csv = df.to_csv().encode(ENCODING_DEFAULT)
         st.download_button(
@@ -81,5 +113,64 @@ if uploaded_file is not None:
         )
 
         # Print chat as dataframe
-        with st.expander("Preview chat"):
-            st.dataframe(df)
+        tab1, tab2, tab3 = st.tabs(["Number of messages sent", "User interaction", "Table"])
+        # FigureBuilder
+        fb = FigureBuilder(df=df)
+
+        with tab1:
+            # Countring mode
+            count_mode = st.radio(
+                "Counting mode",
+                ("Number of messages sent", "Number of characters sent"),
+                horizontal=True,
+            )
+            # Aggregate all users or disaggregated by user?
+            all_users = st.radio(
+                "Aggregate all users",
+                ("Yes", "No"),
+                horizontal=True,
+                index=1,
+            )
+            all_users = True if all_users == "Yes" else False
+            if count_mode == "Number of messages sent":
+                figs = [
+                    fb.user_interventions_count_linechart(
+                        cumulative=True,
+                        title='Number of messages sent (cumulative)',
+                        msg_length=False,
+                        all_users=all_users,
+                    ),
+                    fb.user_interventions_count_linechart(
+                        date_mode='hour',
+                        title='Number of messages sent (per hour in a day)',
+                        xlabel='Hour',
+                        msg_length=False,
+                        all_users=all_users,
+                    ),
+                ]
+            else:
+                figs = [
+                    fb.user_interventions_count_linechart(
+                        cumulative=True,
+                        title='Number of characters sent (cumulative)',
+                        msg_length=True,
+                        all_users=all_users,
+                    ),
+                    fb.user_interventions_count_linechart(
+                        date_mode='hour',
+                        title='Number of characters sent (per hour in a day)',
+                        xlabel='Hour',
+                        msg_length=True,
+                        all_users=all_users,
+                    ),
+                ]
+            figs.append(fb.user_msg_length_boxplot())
+            for fig in figs:
+                st.plotly_chart(fig)
+
+        with tab2:
+            fig = fb.user_message_responses_heatmap()
+            st.plotly_chart(fig)
+
+        with tab3:
+            st.table(df)
