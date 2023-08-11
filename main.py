@@ -52,8 +52,9 @@ msg_privacy = (
     "**Privacy policy**"
     "\n\n"
     "All your uploaded files are deleted once you leave the page. "
-    "Your files are only used to generate your visualisations and a CSV file for you. "
-    "All the code used to power this site is [public](https://github.com/lucasrodes/whatstk-webapp/)."
+    "Your files are _only_ used to automatically generate your visualisations and a CSV file for you. "
+    "Your files are never accessed by any human, and remain totally private. "
+    "All the code used to run this site is [public](https://github.com/lucasrodes/whatstk-webapp/)."
 )
 
 # st.toast(
