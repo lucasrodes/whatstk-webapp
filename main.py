@@ -9,9 +9,7 @@ import tempfile
 from whatstk import df_from_txt_whatsapp
 import zipfile
 import os
-from whatstk import WhatsAppChat, FigureBuilder
-from whatstk.graph import plot
-from whatstk.data import whatsapp_urls
+from whatstk import FigureBuilder
 
 
 # Page settings
@@ -22,6 +20,17 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
     menu_items=None
 )
+hide_default_format = """
+       <style>
+       #MainMenu {visibility: hidden; }
+       footer {visibility: hidden;}
+       </style>
+       """
+st.markdown(hide_default_format, unsafe_allow_html=True)
+
+# APP title
+st.title('WhatsApp chat parser')
+
 
 # Side bar
 with st.sidebar:
@@ -38,12 +47,21 @@ with st.sidebar:
 # Encoding default
 ENCODING_DEFAULT = "utf-8"
 
-# APP title
-st.title('WhatsApp chat parser')
+# Privacy message & toast
+msg_privacy = (
+    "**Privacy policy**"
+    "\n\n"
+    "All your uploaded files are deleted once you leave the page. "
+    "Your files are only used to generate your visualisations and a CSV file for you. "
+    "All the code used to power this site is [public](https://github.com/lucasrodes/whatstk-webapp/)."
+)
+
+# st.toast(
+#     msg_privacy,
+#     icon="🔒"
+# )
 
 
-# Info block
-# st.markdown("### Upload your WhatsApp chat file")
 
 # Upload file box
 uploaded_file = st.file_uploader(
@@ -51,7 +69,6 @@ uploaded_file = st.file_uploader(
     type=["txt", "zip"],
     # label_visibility="collapsed",
 )
-
 # Define temporary file (chat will be stored here temporarily)
 temp_dir = tempfile.TemporaryDirectory()
 uploaded_file_path = Path(temp_dir.name) / "chat"
@@ -112,6 +129,8 @@ if uploaded_file is not None:
             help="Download the formatted chat as a CSV file",
         )
 
+        # Visualisations
+        st.header("Visualisations")
         # Print chat as dataframe
         tab1, tab2, tab3 = st.tabs(["Number of messages sent", "User interaction", "Table"])
         # FigureBuilder
@@ -173,4 +192,7 @@ if uploaded_file is not None:
             st.plotly_chart(fig)
 
         with tab3:
-            st.table(df)
+            st.dataframe(df)
+
+st.divider()
+st.markdown("🔒 " + msg_privacy)
