@@ -1,2 +1,5 @@
 # whatstk-webapp
-WebApp to use some functions from whatstk
+**This tool is based on [whatstk](https://github.com/lucasrodes/whatstk) library.**
+
+
+WebApp to use some functions from whatstk.
