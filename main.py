@@ -114,6 +114,7 @@ if uploaded_file is not None:
             # r"Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
             r".?Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them.",
             r".?Group creator created this group",
+            r".?\screated this group",
             r".?You were added",
         ]
         for sys_msg in sys_msgs:
@@ -140,7 +141,7 @@ if uploaded_file is not None:
         # Visualisations
         st.header("Visualisations")
         # Print chat as dataframe
-        tab1, tab2, tab3 = st.tabs(["Number of messages sent", "User interaction", "Table"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Number of messages sent", "Message length", "User interaction", "Table"])
         # FigureBuilder
         fb = FigureBuilder(df=df)
 
@@ -191,15 +192,17 @@ if uploaded_file is not None:
                         all_users=all_users,
                     ),
                 ]
-            figs.append(fb.user_msg_length_boxplot())
             for fig in figs:
                 st.plotly_chart(fig)
 
         with tab2:
+            fig = fb.user_msg_length_boxplot()
+            st.plotly_chart(fig)
+        with tab3:
             fig = fb.user_message_responses_heatmap()
             st.plotly_chart(fig)
 
-        with tab3:
+        with tab4:
             st.dataframe(df)
 
 st.divider()
