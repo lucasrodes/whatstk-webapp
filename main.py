@@ -141,7 +141,7 @@ if uploaded_file is not None:
         # Visualisations
         st.header("Visualisations")
         # Print chat as dataframe
-        tab1, tab2, tab3, tab4 = st.tabs(["Number of messages sent", "Message length", "User interaction", "Table"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Number of messages sent", "Length of messages", "User interaction", "Table"])
         # FigureBuilder
         fb = FigureBuilder(df=df)
 
