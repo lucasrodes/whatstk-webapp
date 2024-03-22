@@ -10,6 +10,7 @@ from whatstk import df_from_txt_whatsapp
 import zipfile
 import os
 from whatstk import FigureBuilder
+from streamlit_extras.buy_me_a_coffee import button as coffee_button
 
 
 # Page settings
@@ -207,3 +208,5 @@ if uploaded_file is not None:
 
 st.divider()
 st.markdown("🔒 " + msg_privacy)
+
+coffee_button(username="lucasrg", bg_color="ffffff", coffee_color="FFDD00")
