@@ -28,7 +28,7 @@ hide_default_format = """
        </style>
        """
 st.markdown(hide_default_format, unsafe_allow_html=True)
-st.warning("We have detected an issue with chats using PM/AM date format. Messages sent in AM hours won't be correctly parsed. We are looking into it. You can report issues [here](https://github.com/lucasrodes/whatstk/issues).")
+# st.warning("We have detected an issue with chats using PM/AM date format. Messages sent in AM hours won't be correctly parsed. We are looking into it. You can report issues [here](https://github.com/lucasrodes/whatstk/issues).")
 # APP title
 st.title('WhatsApp chat parser')
 st.markdown("**⚡ Powered by [whatstk](https://github.com/lucasrodes/whatstk)**")
