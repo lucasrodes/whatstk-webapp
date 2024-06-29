@@ -82,26 +82,11 @@ if uploaded_file is not None:
 
     # Load file as dataframe
     try:
-        if uploaded_file.name.endswith(".zip"):
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # Uncompress the file
-                with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-
-                files = os.listdir(temp_dir)
-                assert len(files) == 1, "Unexpected number of files in the compressed file! Only one is expected (the chat txt file)"
-                # Read
-                df = df_from_txt_whatsapp(
-                    temp_dir / Path(files[0]),
-                    hformat=hformat,
-                    encoding=encoding,
-                )
-        else:
-            df = df_from_txt_whatsapp(
-                output_temporary_file.name,
-                hformat=hformat,
-                encoding=encoding,
-            )
+        df = df_from_txt_whatsapp(
+            output_temporary_file.name,
+            hformat=hformat,
+            encoding=encoding,
+        )
     except RuntimeError:
         st.error(
             "The chat could not be parsed automatically! You can try to set custom `hformat` "
