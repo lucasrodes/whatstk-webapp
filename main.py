@@ -1,14 +1,12 @@
-"""
-# My first app
-Here's our first attempt at using data to create a table:
+"""Streamlit-based app to parse whatsapp chats.
+
+Uses whatstk.
 """
 
 from pathlib import Path
 import streamlit as st
 import tempfile
-from whatstk import df_from_txt_whatsapp
-import zipfile
-import os
+from whatstk import df_from_whatsapp
 from whatstk import FigureBuilder
 from streamlit_extras.buy_me_a_coffee import button as coffee_button
 
@@ -28,7 +26,7 @@ hide_default_format = """
        </style>
        """
 st.markdown(hide_default_format, unsafe_allow_html=True)
-# st.warning("We have detected an issue with chats using PM/AM date format. Messages sent in AM hours won't be correctly parsed. We are looking into it. You can report issues [here](https://github.com/lucasrodes/whatstk/issues).")
+
 # APP title
 st.title('WhatsApp chat parser')
 st.markdown("**⚡ Powered by [whatstk](https://github.com/lucasrodes/whatstk)**")
@@ -65,7 +63,6 @@ msg_privacy = (
 # )
 
 
-
 # Upload file box
 uploaded_file = st.file_uploader(
     label="Upload your WhatsApp chat file ([learn more](https://whatstk.readthedocs.io/en/stable/source/getting_started/export_chat.html)).",
@@ -82,18 +79,22 @@ if uploaded_file is not None:
 
     # Load file as dataframe
     try:
-        df = df_from_txt_whatsapp(
+        df = df_from_whatsapp(
             output_temporary_file.name,
             hformat=hformat,
             encoding=encoding,
         )
-    except RuntimeError:
+    except Exception as e:
         st.error(
             "The chat could not be parsed automatically! You can try to set custom `hformat` "
             "value in the side bar config."
             "Additionally, please report to https://github.com/lucasrodes/whatstk/issues. If possible, "
             "please provide a sample of your chat (feel free to replace the actual messages with dummy text)."
         )
+        with open(output_temporary_file.name, 'rb') as f:
+            print("Sample of the chat (for debugging purposes):")
+            print(f.read(1000).decode())
+        st.stop()
     else:
         # Remove system messages
         sys_msgs = [
