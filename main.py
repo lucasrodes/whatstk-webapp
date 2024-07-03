@@ -2,7 +2,8 @@
 
 Uses whatstk.
 """
-
+import os
+import zipfile
 from pathlib import Path
 import streamlit as st
 import tempfile
@@ -79,11 +80,26 @@ if uploaded_file is not None:
 
     # Load file as dataframe
     try:
-        df = df_from_whatsapp(
-            output_temporary_file.name,
-            hformat=hformat,
-            encoding=encoding,
-        )
+        if uploaded_file.name.endswith(".zip"):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Uncompress the file
+                with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
+                    zip_ref.extractall(temp_dir)
+
+                files = os.listdir(temp_dir)
+                assert len(files) == 1, "Unexpected number of files in the compressed file! Only one is expected (the chat txt file)"
+                # Read
+                df = df_from_whatsapp(
+                    str(temp_dir / Path(files[0])),
+                    hformat=hformat,
+                    encoding=encoding,
+                )
+        else:
+            df = df_from_whatsapp(
+                output_temporary_file.name,
+                hformat=hformat,
+                encoding=encoding,
+            )
     except Exception as e:
         st.error(
             "The chat could not be parsed automatically! You can try to set custom `hformat` "
@@ -91,9 +107,10 @@ if uploaded_file is not None:
             "Additionally, please report to https://github.com/lucasrodes/whatstk/issues. If possible, "
             "please provide a sample of your chat (feel free to replace the actual messages with dummy text)."
         )
-        with open(output_temporary_file.name, 'rb') as f:
-            print("Sample of the chat (for debugging purposes):")
-            print(f.read(1000).decode())
+        st.error(f"ERROR: {e}")
+        # with open(output_temporary_file.name, 'rb') as f:
+        #     print("Sample of the chat (for debugging purposes):")
+        #     print(f.read(1000).decode())
         st.stop()
     else:
         # Remove system messages
